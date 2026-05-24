@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: rcs-attendance-manager
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: DB_DIR
+        value: ./database
+      - key: UPLOADS_DIR
+        value: ./uploads
