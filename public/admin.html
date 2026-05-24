@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="RCS Admin Dashboard — Manage departments, supervisors, and view attendance">
+  <title>Admin Dashboard — RCS</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="bg-mesh"></div>
+  <div class="app-container">
+    <div class="dashboard">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <div class="logo-sm">RCS</div>
+          <div>
+            <span>RCS Manager</span>
+            <small>Admin Panel</small>
+          </div>
+        </div>
+
+        <div class="nav-items">
+          <button class="nav-item active" data-tab="departments" id="nav-departments">
+            <span class="nav-icon">🏢</span> Departments
+          </button>
+          <button class="nav-item" data-tab="supervisors" id="nav-supervisors">
+            <span class="nav-icon">👤</span> Supervisors
+          </button>
+          <button class="nav-item" data-tab="mastersheet" id="nav-mastersheet">
+            <span class="nav-icon">📊</span> Master Sheet
+          </button>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="user-info">
+            <div class="user-avatar" id="userAvatar">A</div>
+            <div>
+              <div class="user-name" id="userName">Admin</div>
+              <div class="user-role">Administrator</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm btn-full" id="logoutBtn">⏻ Logout</button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Stats -->
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card">
+            <div class="stat-icon">🏢</div>
+            <div class="stat-value" id="statDepts">0</div>
+            <div class="stat-label">Departments</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div class="stat-value" id="statSupervisors">0</div>
+            <div class="stat-label">Supervisors</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value" id="statMembers">0</div>
+            <div class="stat-label">Total Members</div>
+          </div>
+        </div>
+
+        <!-- DEPARTMENTS TAB -->
+        <div id="tab-departments" class="tab-content">
+          <div class="card">
+            <div class="card-header">
+              <h3>📁 Departments</h3>
+              <button class="btn btn-primary btn-sm" id="addDeptBtn">+ Add Department</button>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Department Name</th>
+                    <th>Supervisor</th>
+                    <th>Members</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="deptTableBody">
+                  <tr><td colspan="5" class="empty-state"><div class="empty-icon">📁</div><h3>No departments yet</h3><p>Create your first department</p></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUPERVISORS TAB -->
+        <div id="tab-supervisors" class="tab-content hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3>👤 Supervisors</h3>
+              <button class="btn btn-primary btn-sm" id="addSupervisorBtn">+ Add Supervisor</button>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Department</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="supTableBody">
+                  <tr><td colspan="4" class="empty-state"><div class="empty-icon">👤</div><h3>No supervisors yet</h3><p>Create your first supervisor</p></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- MASTER SHEET TAB -->
+        <div id="tab-mastersheet" class="tab-content hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3>📊 Master Attendance Sheet</h3>
+              <div class="filter-bar">
+                <select class="form-input" id="msFilterDept">
+                  <option value="all">All Departments</option>
+                </select>
+                <select class="form-input" id="msFilterMonth"></select>
+                <select class="form-input" id="msFilterYear"></select>
+                <button class="btn btn-primary btn-sm" id="msLoadBtn">Load</button>
+                <button class="btn btn-success btn-sm" id="msExportBtn">⬇ Export Excel</button>
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Emp ID</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Working Days</th>
+                    <th>CL</th>
+                    <th>FL</th>
+                    <th>NH</th>
+                    <th>Absent</th>
+                    <th>Total Days</th>
+                    <th>OT Hours</th>
+                  </tr>
+                </thead>
+                <tbody id="msTableBody">
+                  <tr><td colspan="11" class="empty-state"><div class="empty-icon">📊</div><h3>Select filters and click Load</h3><p>View attendance data across departments</p></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Department Modal -->
+  <div id="deptModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="deptModalTitle">Add Department</h3>
+        <button class="modal-close" onclick="closeModal('deptModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="deptName">Department Name</label>
+          <input type="text" id="deptName" class="form-input" placeholder="e.g. Production">
+        </div>
+        <div class="form-group">
+          <label for="deptCode">Department Code</label>
+          <input type="text" id="deptCode" class="form-input" placeholder="e.g. A" maxlength="10">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('deptModal')">Cancel</button>
+        <button class="btn btn-primary" id="deptSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supervisor Modal -->
+  <div id="supModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="supModalTitle">Add Supervisor</h3>
+        <button class="modal-close" onclick="closeModal('supModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="supUsername">Username</label>
+          <input type="text" id="supUsername" class="form-input" placeholder="e.g. john.dept_a">
+        </div>
+        <div class="form-group" id="supPasswordGroup">
+          <label for="supPassword">Password</label>
+          <input type="password" id="supPassword" class="form-input" placeholder="Minimum 6 characters">
+        </div>
+        <div class="form-group">
+          <label for="supFullName">Full Name</label>
+          <input type="text" id="supFullName" class="form-input" placeholder="e.g. John Sharma">
+        </div>
+        <div class="form-group">
+          <label for="supDept">Assign Department</label>
+          <select id="supDept" class="form-input">
+            <option value="">— Not assigned —</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('supModal')">Cancel</button>
+        <button class="btn btn-primary" id="supSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee Master Drilldown Modal -->
+  <div id="msDetailModal" class="modal-overlay hidden">
+    <div class="modal modal-lg" style="max-width: 900px; width: 90%;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin: 0;" id="msDetailEmployeeName">Employee Daily Attendance</h3>
+          <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--text-secondary);" id="msDetailEmployeeMeta"></p>
+        </div>
+        <button class="modal-close" onclick="closeModal('msDetailModal')">✕</button>
+      </div>
+      <div class="modal-body" style="display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 1.5rem;">
+        <!-- Calendar Grid/Table -->
+        <div>
+          <h4 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-secondary);">Daily Status Breakdown - <span id="msDetailMonthYear">Month Year</span></h4>
+          <div style="max-height: 400px; overflow-y: auto; padding-right: 0.5rem;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr>
+                  <th style="padding: 0.5rem; text-align: left; font-size: 0.8rem;">Date</th>
+                  <th style="padding: 0.5rem; text-align: left; font-size: 0.8rem;">Day</th>
+                  <th style="padding: 0.5rem; text-align: center; font-size: 0.8rem;">Status</th>
+                  <th style="padding: 0.5rem; text-align: right; font-size: 0.8rem;">Overtime</th>
+                </tr>
+              </thead>
+              <tbody id="msDetailTableBody">
+                <!-- Day rows will be dynamically injected here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Leave Quota Status & Summary -->
+        <div style="border-left: 1px solid var(--border-glass); padding-left: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h4 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-secondary);">Annual Leave Quota Status</h4>
+            
+            <div class="quota-progress-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                <span style="font-weight: 600;">Casual Leave (CL)</span>
+                <span id="msClBalance" style="font-size: 0.9rem; font-weight: 500;">0 / 12</span>
+              </div>
+              <div class="progress-bar-bg" style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; overflow: hidden;">
+                <div id="msClProgress" style="background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+              </div>
+            </div>
+
+            <div class="quota-progress-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                <span style="font-weight: 600;">Festive Leave (FL)</span>
+                <span id="msFlBalance" style="font-size: 0.9rem; font-weight: 500;">0 / 10</span>
+              </div>
+              <div class="progress-bar-bg" style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; overflow: hidden;">
+                <div id="msFlProgress" style="background: #f2994a; height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+              </div>
+            </div>
+
+            <div class="quota-progress-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                <span style="font-weight: 600;">National Holiday (NH)</span>
+                <span id="msNhBalance" style="font-size: 0.9rem; font-weight: 500;">0 / 8</span>
+              </div>
+              <div class="progress-bar-bg" style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; overflow: hidden;">
+                <div id="msNhProgress" style="background: #27ae60; height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+              </div>
+            </div>
+
+            <div style="margin-top: 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1rem;">
+              <h5 style="margin: 0 0 0.5rem 0; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Month Summary</h5>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.85rem;">
+                <div>Present: <strong id="msSumPresent" style="color: #27ae60;">0</strong></div>
+                <div>Absent: <strong id="msSumAbsent" style="color: var(--danger);">0</strong></div>
+                <div>CL: <strong id="msSumCL" style="color: var(--primary);">0</strong></div>
+                <div>FL: <strong id="msSumFL" style="color: #f2994a;">0</strong></div>
+                <div>NH: <strong id="msSumNH" style="color: #27ae60;">0</strong></div>
+                <div>Week Off: <strong id="msSumWO" style="color: #3b82f6;">0</strong></div>
+                <div>OT Hours: <strong id="msSumOT">0</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 1.5rem;">
+            <button class="btn btn-secondary btn-full" onclick="closeModal('msDetailModal')">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

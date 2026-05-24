@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="RCS Supervisor Dashboard — Manage members and mark attendance">
+  <title>Supervisor Dashboard — RCS</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="bg-mesh"></div>
+  <div class="app-container">
+    <div class="dashboard">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <div class="logo-sm">RCS</div>
+          <div>
+            <span>RCS Manager</span>
+            <small id="deptLabel">Supervisor</small>
+          </div>
+        </div>
+
+        <div class="nav-items">
+          <button class="nav-item active" data-tab="members" id="nav-members">
+            <span class="nav-icon">👥</span> Members
+          </button>
+          <button class="nav-item" data-tab="attendance" id="nav-attendance">
+            <span class="nav-icon">📋</span> Attendance
+          </button>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="user-info">
+            <div class="user-avatar" id="userAvatar">S</div>
+            <div>
+              <div class="user-name" id="userName">Supervisor</div>
+              <div class="user-role" id="userDept">Department</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm btn-full" id="logoutBtn">⏻ Logout</button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value" id="statMembers">0</div>
+            <div class="stat-label">Active Members</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🏢</div>
+            <div class="stat-value" id="statDeptName">—</div>
+            <div class="stat-label">Department</div>
+          </div>
+        </div>
+
+        <!-- MEMBERS TAB -->
+        <div id="tab-members" class="tab-content">
+          <div class="card">
+            <div class="card-header">
+              <h3>👥 Department Members</h3>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+                <button class="btn btn-secondary btn-sm" id="importBtn">📥 Import Excel</button>
+                <button class="btn btn-primary btn-sm" id="addMemberBtn">+ Add Member</button>
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Designation</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="memberTableBody">
+                  <tr><td colspan="7" class="empty-state"><div class="empty-icon">👥</div><h3>No members yet</h3><p>Add members manually or import from Excel</p></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ATTENDANCE TAB -->
+        <div id="tab-attendance" class="tab-content hidden">
+          <!-- Department Configuration Parameters Card -->
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header" style="border-bottom: none; padding-bottom: 0;">
+              <h3 style="font-size: 1.1rem; color: var(--text-secondary)">🏢 Month Parameters Configuration</h3>
+            </div>
+            <div class="card-body" style="padding: 1rem 1.5rem; display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.8rem; margin-bottom: 0.25rem; display: block; font-weight: 500;">Working Days</label>
+                <input type="number" id="deptWorkingDays" class="form-input" style="width: 100px; height: 38px;" min="0" max="31" value="0">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.8rem; margin-bottom: 0.25rem; display: block; font-weight: 500;">National Holidays (NH)</label>
+                <input type="number" id="deptNH" class="form-input" style="width: 100px; height: 38px;" min="0" max="31" value="0">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label style="font-size: 0.8rem; margin-bottom: 0.25rem; display: block; font-weight: 500;">Festive Leaves (FL)</label>
+                <input type="number" id="deptFL" class="form-input" style="width: 100px; height: 38px;" min="0" max="31" value="0">
+              </div>
+              <button class="btn btn-secondary" id="saveDeptConfigBtn" style="margin-top: 1.25rem; height: 38px;">💾 Save Parameters</button>
+            </div>
+          </div>
+
+          <!-- Employee Attendance Card Grid -->
+          <div class="card">
+            <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
+              <h3>📋 Employee Cards</h3>
+              <div class="filter-bar" style="width: 100%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <select class="form-input" id="attMonth" style="width: 120px; height: 38px;"></select>
+                  <select class="form-input" id="attYear" style="width: 100px; height: 38px;"></select>
+                  <button class="btn btn-primary" id="attLoadBtn" style="height: 38px;">Load</button>
+                </div>
+                <div style="flex: 1; max-width: 400px; display: flex; align-items: center;">
+                  <input type="text" id="attSearchInput" class="form-input" placeholder="🔍 Search employee by name or ID..." style="height: 38px;">
+                </div>
+              </div>
+            </div>
+            <div class="card-body" style="padding: 1.5rem;">
+              <div class="employee-grid" id="employeeCardsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+                <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
+                  <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                  <h3>Select month and year</h3>
+                  <p>Then click Load to see employee cards</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Add/Edit Member Modal -->
+  <div id="memberModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="memberModalTitle">Add Member</h3>
+        <button class="modal-close" onclick="closeModal('memberModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="memEmpId">Employee ID</label>
+          <input type="text" id="memEmpId" class="form-input" placeholder="e.g. EMP001">
+        </div>
+        <div class="form-group">
+          <label for="memName">Full Name</label>
+          <input type="text" id="memName" class="form-input" placeholder="e.g. Rajesh Kumar">
+        </div>
+        <div class="form-group">
+          <label for="memDesignation">Designation</label>
+          <input type="text" id="memDesignation" class="form-input" placeholder="e.g. Machine Operator">
+        </div>
+        <div class="form-group">
+          <label for="memPhone">Phone</label>
+          <input type="text" id="memPhone" class="form-input" placeholder="e.g. 9876543210">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-top: 1rem;">
+          <div class="form-group">
+            <label for="memClQuota">CL Quota</label>
+            <input type="number" id="memClQuota" class="form-input" value="12" min="0">
+          </div>
+          <div class="form-group">
+            <label for="memFlQuota">FL Quota</label>
+            <input type="number" id="memFlQuota" class="form-input" value="10" min="0">
+          </div>
+          <div class="form-group">
+            <label for="memNhQuota">NH Quota</label>
+            <input type="number" id="memNhQuota" class="form-input" value="8" min="0">
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 1rem;">
+          <label for="memWeekOff">Weekly Off</label>
+          <select id="memWeekOff" class="form-input">
+            <option value="Sunday">Sunday</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('memberModal')">Cancel</button>
+        <button class="btn btn-primary" id="memberSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import Excel Modal -->
+  <div id="importModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>📥 Import Members from Excel</h3>
+        <button class="modal-close" onclick="closeModal('importModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-icon">📄</div>
+          <p>Drag & drop Excel file here or click to browse</p>
+          <p class="upload-hint">Columns: Employee ID, Name, Designation, Phone, cl_quota, fl_quota, nh_quota (max 5MB)</p>
+          <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none">
+        </div>
+        <div id="uploadStatus" class="hidden" style="margin-top:1rem;text-align:center;color:var(--text-secondary)"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('importModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Daily Attendance Modal -->
+  <div id="dailyAttendanceModal" class="modal-overlay hidden">
+    <div class="modal modal-lg" style="max-width: 900px; width: 90%;">
+      <div class="modal-header">
+        <div>
+          <h3 style="margin: 0;" id="dailyModalEmployeeName">Mark Daily Attendance</h3>
+          <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--text-secondary);" id="dailyModalEmployeeId"></p>
+        </div>
+        <button class="modal-close" onclick="closeModal('dailyAttendanceModal')">✕</button>
+      </div>
+      <div class="modal-body" style="display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 1.5rem;">
+        <!-- Calendar Grid -->
+        <div>
+          <h4 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-secondary);">Calendar - <span id="dailyModalMonthYear">Month Year</span></h4>
+          <div class="calendar-days-grid" id="calendarDaysGrid" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 400px; overflow-y: auto; padding-right: 0.5rem;">
+            <!-- Day rows will be dynamically injected here -->
+          </div>
+        </div>
+        
+        <!-- Leave Quotas & Live Recalculations -->
+        <div style="border-left: 1px solid var(--border); padding-left: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h4 style="margin-top: 0; margin-bottom: 1rem; color: var(--text-secondary);">Annual Leave Quotas</h4>
+            
+            <div class="quota-progress-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                <span style="font-weight: 600;">Casual Leave (CL)</span>
+                <span id="clQuotaBalance" style="font-size: 0.9rem; font-weight: 500;">12 / 12</span>
+              </div>
+              <div class="progress-bar-bg" style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; overflow: hidden;">
+                <div id="clQuotaProgress" style="background: var(--primary); height: 100%; width: 100%; transition: width 0.3s ease;"></div>
+              </div>
+            </div>
+
+            <div class="quota-progress-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                <span style="font-weight: 600;">Festive Leave (FL)</span>
+                <span id="flQuotaBalance" style="font-size: 0.9rem; font-weight: 500;">10 / 10</span>
+              </div>
+              <div class="progress-bar-bg" style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; overflow: hidden;">
+                <div id="flQuotaProgress" style="background: #f2994a; height: 100%; width: 100%; transition: width 0.3s ease;"></div>
+              </div>
+            </div>
+
+            <div class="quota-progress-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                <span style="font-weight: 600;">National Holiday (NH)</span>
+                <span id="nhQuotaBalance" style="font-size: 0.9rem; font-weight: 500;">8 / 8</span>
+              </div>
+              <div class="progress-bar-bg" style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; overflow: hidden;">
+                <div id="nhQuotaProgress" style="background: #27ae60; height: 100%; width: 100%; transition: width 0.3s ease;"></div>
+              </div>
+            </div>
+
+            <div style="margin-top: 1rem; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 1rem;">
+              <h5 style="margin: 0 0 0.5rem 0; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Month Summary (Recalculated)</h5>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.85rem;">
+                <div>Present: <strong id="summaryPresent" style="color: #27ae60;">0</strong></div>
+                <div>Absent: <strong id="summaryAbsent" style="color: var(--danger);">0</strong></div>
+                <div>CL: <strong id="summaryCL" style="color: var(--primary);">0</strong></div>
+                <div>FL: <strong id="summaryFL" style="color: #f2994a;">0</strong></div>
+                <div>NH: <strong id="summaryNH" style="color: #27ae60;">0</strong></div>
+                <div>Week Off: <strong id="summaryWO" style="color: #3b82f6;">0</strong></div>
+                <div>OT Hours: <strong id="summaryOT">0</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <button class="btn btn-primary btn-full" id="saveDailyAttendanceBtn">💾 Save Attendance</button>
+            <button class="btn btn-secondary btn-full" onclick="closeModal('dailyAttendanceModal')">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="/js/supervisor.js"></script>
+</body>
+</html>
