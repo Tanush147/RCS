@@ -2,7 +2,8 @@ const Database = require('better-sqlite3');
 const bcrypt = require('bcrypt');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, 'rcs_attendance.db');
+const DB_DIR = process.env.DB_DIR || __dirname;
+const DB_PATH = path.join(DB_DIR, 'rcs_attendance.db');
 
 function initDatabase() {
   const db = new Database(DB_PATH);

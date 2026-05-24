@@ -17,10 +17,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Session configuration
+const DB_DIR = process.env.DB_DIR || path.join(__dirname, 'database');
 app.use(session({
   store: new SQLiteStore({
     db: 'sessions.db',
-    dir: path.join(__dirname, 'database')
+    dir: DB_DIR
   }),
   secret: 'rcs-attendance-secret-key-2024',
   resave: false,
@@ -43,7 +44,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Create uploads directory
 const fs = require('fs');
-const uploadsDir = path.join(__dirname, 'uploads');
+const uploadsDir = process.env.UPLOADS_DIR || path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
